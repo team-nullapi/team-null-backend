@@ -58,7 +58,7 @@ function facePlusAPICall (imgData) {
     response.status(500).send('Sorry all berries');
   }
 }
-app.post('/pic',upload.single('image'), (request, response) => sendPic(request, response));
+app.post('/mult',upload.single('image'), (request, response) => sendPic(request, response));
 
 function sendPic(req, res) {
   const queryData = req.body.imageObj; //this should be the base64string
