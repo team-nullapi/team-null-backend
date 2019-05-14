@@ -16,9 +16,14 @@ app.use(express.static('./public'));
 const client = new pg.Client(process.env.DATABASE_URL);
 client.connect();
 
+app.get('/', (request, response) => response.send('Server works'));
+app.get('/pic', (request, response) => response.send('Send pic'));
 
+function sendPic(request, response) {
+  const queryData = request.query.data;
+}
 
-
+app.get
 
 
 app.use('*', (request, response) => response.send('Oops'));
