@@ -23,7 +23,15 @@ app.post('/pic',upload.single('image'), (request, response) => sendPic(request, 
 
 function sendPic(req, res) {
   const queryData = req.body.imageObj; //this should be the base64string
+  // console.log('works', req.body);
   //Todo make request to face++
+superagent.post('https://api-us.faceplusplus.com/facepp/v3/detect')
+        .send({ api_key: process.env.FACE_PLUS_API_KEY, api_secret: process.env.FACE_PLUE_API_SECRET,image_base64: queryData })
+        .then(result => {
+          console.log(result)
+          res.send('works')
+        })
+        .catch(err => console.error(err))
 
 }
 
