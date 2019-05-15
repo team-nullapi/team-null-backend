@@ -57,7 +57,7 @@ function facePlusAPICall (imgData) {
       // .set('Content-Type', 'application/x-www-form-urlencoded')
       // .send({image_base64: imgData, return_attributes: 'emotion'})
       .then((faceAPIRes) => {
-        let faceAPIInstance = new Fortune ('adminTest', fortunePicker('anger'), lotto(), 'anger', faceAPIRes.body.faces[0].attributes.emotion.sadness, faceAPIRes.body.faces[0].attributes.emotion.neutral, faceAPIRes.body.faces[0].attributes.emotion.disgust, faceAPIRes.body.faces[0].attributes.emotion.anger, faceAPIRes.body.faces[0].attributes.emotion.surprise, faceAPIRes.body.faces[0].attributes.emotion.fear, faceAPIRes.body.faces[0].attributes.emotion.happiness, Date.now());
+        let faceAPIInstance = new Fortune ('adminTest', fortunePicker('anger'), lotto(), dominantAttribute(faceAPIRes.body), faceAPIRes.body.faces[0].attributes.emotion.sadness, faceAPIRes.body.faces[0].attributes.emotion.neutral, faceAPIRes.body.faces[0].attributes.emotion.disgust, faceAPIRes.body.faces[0].attributes.emotion.anger, faceAPIRes.body.faces[0].attributes.emotion.surprise, faceAPIRes.body.faces[0].attributes.emotion.fear, faceAPIRes.body.faces[0].attributes.emotion.happiness, Date.now());
         console.log(faceAPIInstance);
         return faceAPIInstance;
       })
@@ -67,6 +67,19 @@ function facePlusAPICall (imgData) {
     response.status(500).send('Sorry all berries');
   }
 }
+
+function dominantAttribute(data) {
+let emotionObj = data.faces[0].attributes.emotion
+let emotionArr = Object.entries(emotionObj);
+let final = emotionArr.reduce((previousValue, currentValue) => {
+  if (previousValue[1] > currentValue[1]) {
+    return previousValue;
+  } else {
+    return currentValue;
+  }
+})[0];
+return final;
+} 
 
 function lotto()  {
   let arr = [];
