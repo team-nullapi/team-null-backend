@@ -51,15 +51,15 @@ function grabFortunes(req, res){
       console.log(result);
       let fortuneArr = [];
       if(result.rowCount > 0) {
-        fortuneArr = result.rows[0].map(fortune => {
-          new Fortune(fortune.username, fortune.fortune, fortune.lotto, fortune.dominant_attribute, fortune.score, fortune.created_on);
+        fortuneArr = result.rows.map(fortune => {
+          return new Fortune(fortune.username, fortune.fortune, fortune.lotto, fortune.dominant_attribute, fortune.score, fortune.created_on);
         });
         return res.send(fortuneArr);
       } else {
         return res.send('You do not have any fortunes');
       }
     })
-    .catch(err => err.status(500).send('Sorry an error ocurred trying to grab your fortunes'));
+    .catch(err => res.status(500).send('Sorry an error ocurred trying to grab your fortunes' + err));
 }
 
 function facePlusAPICall (req, res) {
@@ -123,19 +123,19 @@ function lottoGen() {
   return arr.join(', ');
 }
 
-function fortunePicker(dominant_attribute) {
+function fortunePicker(dominant_attribute, res) {
   let selectSQL = `SELECT * FROM ${dominant_attribute}`;
   return client.query(selectSQL)
     .then(result => {
       if(result.rowCount > 0) {
         let randomFor = Math.floor(Math.random() * (result.rowCount - 0)) + 0;
         let fortune = result.rows[randomFor].fortune_text;
-        return result.send(fortune);
+        return res.send(fortune);
       } else {
-        return result.send('Oops Something Went Wrong');
+        return res.send('Oops Something Went Wrong');
       }
     })
-    .catch(err => err.status(500).send('There was an error'));
+    .catch(err => res.status(500).send('There was an error ' + err));
 }
 
 app.use('*', (request, response) => response.send('Oops'));
