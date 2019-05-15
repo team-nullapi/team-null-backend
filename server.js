@@ -36,19 +36,35 @@ function Fortune (username, fortune, lotto, dominant_attribute, sadness, neutral
 
 
 app.get('/', (request, response) => response.send('Server works'));
-app.post('/pic',upload.single('image'), (request, response) => sendPic(request, response));
+app.post('/pic',upload.single('image'), (request, response) => facePlusAPICall(request, response));
+app.get('/fortunes', (request, response) => grabFortunes(request, response));
 // ToDo insert get all items request
 
 
-function sendPic(req, res) {
-  const queryData = req.body.imageObj; //this should be the base64string
-  facePlusAPICall(queryData);
+function grabFortunes(req, res){
+  // query sql table for data based on username
+  let sqlStatement = 'SELECT * FROM users WHERE username=$1';
+  let values = [req.query.data.username];
+  return client.query(sqlStatement, values)
+    // send back data 
+    .then(result => {
+      let fortuneArr = [];
+      if(result.rowCount > 0) {
+        fortuneArr = result.rows[0].map(fortune => {
+          new Fortune(fortune.username, fortune.fortune, fortune.lotto, fortune.dominant_attribute, fortune.score, fortune.created_on)
+        })
+        return res.send(fortuneArr)
+      } else {
+        return res.send('You do not have any fortunes');
+      }
+    })
+    .catch(err => res.status(500).send('Sorry an error ocurred trying to grab your fortunes'))
 }
 
-function facePlusAPICall (imgData) {
+function facePlusAPICall (req, res) {
   try {
+    let imgData = req.body.imageObj;
     let facePlusQueryString =`https://api-us.faceplusplus.com/facepp/v3/detect?api_key=${process.env.FACEPLUS_API_KEY}&api_secret=${process.env.FACEPLUS_API_SECRET}`;
-    // this is for testing let facePlusQueryString = `https://api-us.faceplusplus.com/facepp/v3/detect?api_key=jkbjMP6Jl9y3rdGU-6F86EAS3PbheD6w&api_secret=5_Yq5fGE9sPfdjjYRlaHpmXIqVVwa8lK&image_url=https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Waldemar_Ritter_2015.jpg/325px-Waldemar_Ritter_2015.jpg&return_attributes=emotion`;
     return superagent
       .post(facePlusQueryString)
       .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -56,9 +72,9 @@ function facePlusAPICall (imgData) {
       .then((faceAPIRes) => {
         let emotionsObj = faceAPIRes.body.faces[0].attributes.emotion;
         let lotto = lottoGen();
-        let fortune = fortunePicker('anger'); // to do flesh out this
-        let username = 'adminTest'; // ToDo Flesh out this
         let dominant_attribute = dominantAttribute(emotionsObj);
+        let fortune = fortunePicker(dominant_attribute);
+        let username = req.body.username;
         let created_on = Date.now();
         let faceAPIInstance = new Fortune (username, fortune, lotto, dominant_attribute, emotionsObj.sadness, emotionsObj.neutral, emotionsObj.disgust, emotionsObj.anger, emotionsObj.surprise, emotionsObj.fear, emotionsObj.happiness, created_on);
         let insertStatement = `INSERT INTO users (username, fortune, lotto, dominant_attribute, sadness, neutral, disgust, anger, surprise, fear, happiness, created_on) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) ON CONFLICT DO NOTHING;`;
@@ -77,12 +93,12 @@ function facePlusAPICall (imgData) {
           created_on
         ];
         client.query(insertStatement, insertValues);
-        return faceAPIInstance;
+        return res.send(faceAPIInstance);
       })
       .catch(err => console.log(err));
 
   } catch(error) {
-    response.status(500).send('Sorry all berries');
+    res.status(500).send('Sorry all berries');
   }
 }
 
