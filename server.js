@@ -57,8 +57,7 @@ function facePlusAPICall (imgData) {
       // .set('Content-Type', 'application/x-www-form-urlencoded')
       // .send({image_base64: imgData, return_attributes: 'emotion'})
       .then((faceAPIRes) => {
-        console.log(totalScoreString);
-        let faceAPIInstance = new Fortune ('adminTest', 'This is a dummy fortune', '43, 2, 5, 23, 45, 21', 'anger', faceAPIRes.body.faces[0].attributes.emotion.sadness, faceAPIRes.body.faces[0].attributes.emotion.neutral, faceAPIRes.body.faces[0].attributes.emotion.disgust, faceAPIRes.body.faces[0].attributes.emotion.anger, faceAPIRes.body.faces[0].attributes.emotion.surprise, faceAPIRes.body.faces[0].attributes.emotion.fear, faceAPIRes.body.faces[0].attributes.emotion.happiness, Date.now());
+        let faceAPIInstance = new Fortune ('adminTest', fortunePicker('anger'), lotto(), 'anger', faceAPIRes.body.faces[0].attributes.emotion.sadness, faceAPIRes.body.faces[0].attributes.emotion.neutral, faceAPIRes.body.faces[0].attributes.emotion.disgust, faceAPIRes.body.faces[0].attributes.emotion.anger, faceAPIRes.body.faces[0].attributes.emotion.surprise, faceAPIRes.body.faces[0].attributes.emotion.fear, faceAPIRes.body.faces[0].attributes.emotion.happiness, Date.now());
         console.log(faceAPIInstance);
         return faceAPIInstance;
       })
@@ -69,7 +68,21 @@ function facePlusAPICall (imgData) {
   }
 }
 
+function lotto()  {
+  let arr = [];
+  for (let i = 0; i < 6; i++) {
+    arr.push(Math.floor(Math.random() * (64 - 1)) + 1)
+  }
+  return arr.join(', ');
+}
 
+function fortunePicker(dominant_attribute) {
+  if (dominant_attribute === 'anger') {
+    return 'This is an angry fortune';
+  } else {
+  return 'This is not an angry fortune';
+  }
+}
 
 app.use('*', (request, response) => response.send('Oops'));
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
