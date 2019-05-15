@@ -50,15 +50,15 @@ function grabFortunes(req, res){
     .then(result => {
       let fortuneArr = [];
       if(result.rowCount > 0) {
-        fortuneArr = result.rows[0].map(fortune => {
-          new Fortune(fortune.username, fortune.fortune, fortune.lotto, fortune.dominant_attribute, fortune.score, fortune.created_on)
-        })
-        return res.send(fortuneArr)
+        fortuneArr = result.rows.map(fortune => {
+          return new Fortune(fortune.username, fortune.fortune, fortune.lotto, fortune.dominant_attribute, fortune.score, fortune.created_on)
+        });
+        return res.send(fortuneArr);
       } else {
         return res.send('You do not have any fortunes');
       }
     })
-    .catch(err => res.status(500).send('Sorry an error ocurred trying to grab your fortunes'))
+    .catch(err => res.status(500).send('Sorry an error ocurred trying to grab your fortunes' + err));
 }
 
 function facePlusAPICall (req, res) {
