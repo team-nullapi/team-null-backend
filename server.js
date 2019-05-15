@@ -44,21 +44,22 @@ app.get('/fortunes', (request, response) => grabFortunes(request, response));
 function grabFortunes(req, res){
   // query sql table for data based on username
   let sqlStatement = 'SELECT * FROM users WHERE username=$1';
-  let values = [req.query.data.username];
+  let values = ['adminTest'];
   return client.query(sqlStatement, values)
-    // send back data 
+    // send back data
     .then(result => {
+      console.log(result);
       let fortuneArr = [];
       if(result.rowCount > 0) {
         fortuneArr = result.rows[0].map(fortune => {
-          new Fortune(fortune.username, fortune.fortune, fortune.lotto, fortune.dominant_attribute, fortune.score, fortune.created_on)
-        })
-        return res.send(fortuneArr)
+          new Fortune(fortune.username, fortune.fortune, fortune.lotto, fortune.dominant_attribute, fortune.score, fortune.created_on);
+        });
+        return res.send(fortuneArr);
       } else {
         return res.send('You do not have any fortunes');
       }
     })
-    .catch(err => res.status(500).send('Sorry an error ocurred trying to grab your fortunes'))
+    .catch(err => err.status(500).send('Sorry an error ocurred trying to grab your fortunes'));
 }
 
 function facePlusAPICall (req, res) {
@@ -123,12 +124,18 @@ function lottoGen() {
 }
 
 function fortunePicker(dominant_attribute) {
-  //to do flesh out fortune picker to pick fortunes from a db
-  if (dominant_attribute === 'anger') {
-    return 'This is an angry fortune';
-  } else {
-    return 'This is not an angry fortune';
-  }
+  let selectSQL = `SELECT * FROM ${dominant_attribute}`;
+  return client.query(selectSQL)
+    .then(result => {
+      if(result.rowCount > 0) {
+        let randomFor = Math.floor(Math.random() * (result.rowCount - 0)) + 0;
+        let fortune = result.rows[randomFor].fortune_text;
+        return result.send(fortune);
+      } else {
+        return result.send('Oops Something Went Wrong');
+      }
+    })
+    .catch(err => err.status(500).send('There was an error'));
 }
 
 app.use('*', (request, response) => response.send('Oops'));
