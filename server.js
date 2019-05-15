@@ -74,27 +74,29 @@ function facePlusAPICall (req, res) {
         let emotionsObj = faceAPIRes.body.faces[0].attributes.emotion;
         let lotto = lottoGen();
         let dominant_attribute = dominantAttribute(emotionsObj);
-        let fortune = fortunePicker(dominant_attribute);
-        let username = req.body.username;
-        let created_on = Date.now();
-        let faceAPIInstance = new Fortune (username, fortune, lotto, dominant_attribute, emotionsObj.sadness, emotionsObj.neutral, emotionsObj.disgust, emotionsObj.anger, emotionsObj.surprise, emotionsObj.fear, emotionsObj.happiness, created_on);
-        let insertStatement = `INSERT INTO users (username, fortune, lotto, dominant_attribute, sadness, neutral, disgust, anger, surprise, fear, happiness, created_on) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) ON CONFLICT DO NOTHING;`;
-        let insertValues = [
-          username,
-          fortune,
-          lotto,
-          dominant_attribute,
-          emotionsObj.sadness,
-          emotionsObj.neutral,
-          emotionsObj.disgust,
-          emotionsObj.anger,
-          emotionsObj.surprise,
-          emotionsObj.fear,
-          emotionsObj.happiness,
-          created_on
-        ];
-        client.query(insertStatement, insertValues);
-        return res.send(faceAPIInstance);
+        fortunePicker(dominant_attribute).then(fortune => {
+          let username = req.body.username;
+          let created_on = Date.now();
+          let faceAPIInstance = new Fortune (username, fortune, lotto, dominant_attribute, emotionsObj.sadness, emotionsObj.neutral, emotionsObj.disgust, emotionsObj.anger, emotionsObj.surprise, emotionsObj.fear, emotionsObj.happiness, created_on);
+          let insertStatement = `INSERT INTO users (username, fortune, lotto, dominant_attribute, sadness, neutral, disgust, anger, surprise, fear, happiness, created_on) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) ON CONFLICT DO NOTHING;`;
+          let insertValues = [
+            username,
+            fortune,
+            lotto,
+            dominant_attribute,
+            emotionsObj.sadness,
+            emotionsObj.neutral,
+            emotionsObj.disgust,
+            emotionsObj.anger,
+            emotionsObj.surprise,
+            emotionsObj.fear,
+            emotionsObj.happiness,
+            created_on
+          ];
+          console.log(insertValues);
+          client.query(insertStatement, insertValues);
+          return res.send(faceAPIInstance);
+        });
       })
       .catch(err => console.log(err));
 
@@ -123,19 +125,18 @@ function lottoGen() {
   return arr.join(', ');
 }
 
-function fortunePicker(dominant_attribute, res) {
+function fortunePicker(dominant_attribute) {
   let selectSQL = `SELECT * FROM ${dominant_attribute}`;
   return client.query(selectSQL)
     .then(result => {
       if(result.rowCount > 0) {
         let randomFor = Math.floor(Math.random() * (result.rowCount - 0)) + 0;
         let fortune = result.rows[randomFor].fortune_text;
-        return res.send(fortune);
+        return fortune;
       } else {
-        return res.send('Oops Something Went Wrong');
+        return 'Oops Something Went Wrong';
       }
-    })
-    .catch(err => res.status(500).send('There was an error ' + err));
+    });
 }
 
 app.use('*', (request, response) => response.send('Oops'));
