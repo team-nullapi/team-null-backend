@@ -46,6 +46,9 @@ function facePlusAPICall (imgData) {
       .send({image_base64: imgData, return_attributes: 'emotion'})
       .then((faceAPIRes) => {
         console.log(faceAPIRes.body.faces[0]);
+        let emotionArr = Object.keys(faceAPIRes.body.faces[0].attributes.emotion);
+        emotionArr.map(element => element+=`: ${faceAPIRes.body.faces[0].attributes.emotion.element}` 
+        );
         let faceAPIInstance = new Fortune ('adminTest', 'This is a dummy fortune', '43, 2, 5, 23, 45, 21', 'dummy', 'dummy', Date.now());
         console.log(faceAPIInstance);
         return faceAPIInstance;
