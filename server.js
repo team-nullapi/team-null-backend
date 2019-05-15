@@ -19,12 +19,18 @@ app.use(express.static('./public'));
 const client = new pg.Client(process.env.DATABASE_URL);
 client.connect();
 
-function Fortune (username, fortune, lotto, dominant_attribute, score, created_on) {
+function Fortune (username, fortune, lotto, dominant_attribute, sadness, neutral, disgust, anger, surprise, fear, happiness, created_on) {
   this.username = username;
   this.fortune = fortune;
   this.lotto = lotto;
   this.dominant_attribute = dominant_attribute;
-  this.score = score;
+  this.sadness = sadness;
+  this.neutral = neutral;
+  this.disgust = disgust;
+  this.anger = anger;
+  this.surprise = surprise;
+  this.fear = fear;
+  this.happiness = happiness;
   this.created_on = created_on;
 }
 
@@ -51,9 +57,8 @@ function facePlusAPICall (imgData) {
       // .set('Content-Type', 'application/x-www-form-urlencoded')
       // .send({image_base64: imgData, return_attributes: 'emotion'})
       .then((faceAPIRes) => {
-        let totalScoreString = `sadness: ${faceAPIRes.body.faces[0].attributes.emotion.sadness}, neutral: ${faceAPIRes.body.faces[0].attributes.emotion.neutral}, disgust: ${faceAPIRes.body.faces[0].attributes.emotion.disgust}, anger: ${faceAPIRes.body.faces[0].attributes.emotion.anger}, surprise: ${faceAPIRes.body.faces[0].attributes.emotion.surprise}, fear: ${faceAPIRes.body.faces[0].attributes.emotion.surprise}, happiness: ${faceAPIRes.body.faces[0].attributes.emotion.happiness}`
         console.log(totalScoreString);
-        let faceAPIInstance = new Fortune ('adminTest', 'This is a dummy fortune', '43, 2, 5, 23, 45, 21', 'Anger', 'sadness: 0.06, neutral: 6.842, disgust: 0.06, anger: 91.787, surprise: 0.93, fear: 0.06, happiness: 0.261', Date.now());
+        let faceAPIInstance = new Fortune ('adminTest', 'This is a dummy fortune', '43, 2, 5, 23, 45, 21', 'anger', faceAPIRes.body.faces[0].attributes.emotion.sadness, faceAPIRes.body.faces[0].attributes.emotion.neutral, faceAPIRes.body.faces[0].attributes.emotion.disgust, faceAPIRes.body.faces[0].attributes.emotion.anger, faceAPIRes.body.faces[0].attributes.emotion.surprise, faceAPIRes.body.faces[0].attributes.emotion.fear, faceAPIRes.body.faces[0].attributes.emotion.happiness, Date.now());
         console.log(faceAPIInstance);
         return faceAPIInstance;
       })
