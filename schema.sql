@@ -6,7 +6,13 @@ CREATE TABLE IF NOT EXISTS users (
   fortune TEXT,
   lotto VARCHAR(255),
   dominant_attribute VARCHAR(255),
-  score VARCHAR(255),
+  sadness VARCHAR(255),
+  neutral VARCHAR(255),
+  disgust VARCHAR(255),
+  anger VARCHAR(255),
+  surprise VARCHAR(255),
+  fear VARCHAR(255),
+  happiness VARCHAR(255),
   created_on BIGINT
 );
 
