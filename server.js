@@ -37,6 +37,8 @@ function Fortune (username, fortune, lotto, dominant_attribute, sadness, neutral
 
 app.get('/', (request, response) => response.send('Server works'));
 app.post('/pic',upload.single('image'), (request, response) => sendPic(request, response));
+// ToDo insert get all items request
+
 
 function sendPic(req, res) {
   const queryData = req.body.imageObj; //this should be the base64string
@@ -54,8 +56,8 @@ function facePlusAPICall (imgData) {
       .then((faceAPIRes) => {
         let emotionsObj = faceAPIRes.body.faces[0].attributes.emotion;
         let lotto = lottoGen();
-        let fortune = fortunePicker('anger');
-        let username = 'adminTest';
+        let fortune = fortunePicker('anger'); // to do flesh out this
+        let username = 'adminTest'; // ToDo Flesh out this
         let dominant_attribute = dominantAttribute(emotionsObj);
         let created_on = Date.now();
         let faceAPIInstance = new Fortune (username, fortune, lotto, dominant_attribute, emotionsObj.sadness, emotionsObj.neutral, emotionsObj.disgust, emotionsObj.anger, emotionsObj.surprise, emotionsObj.fear, emotionsObj.happiness, created_on);
@@ -105,6 +107,7 @@ function lottoGen() {
 }
 
 function fortunePicker(dominant_attribute) {
+  //to do flesh out fortune picker to pick fortunes from a db
   if (dominant_attribute === 'anger') {
     return 'This is an angry fortune';
   } else {
