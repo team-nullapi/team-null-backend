@@ -38,7 +38,6 @@ function Fortune (username, fortune, lotto, dominant_attribute, sadness, neutral
 app.get('/', (request, response) => response.send('Server works'));
 app.post('/pic',upload.single('image'), (request, response) => facePlusAPICall(request, response));
 app.get('/fortunes', (request, response) => grabFortunes(request, response));
-// ToDo insert get all items request
 
 
 function grabFortunes(req, res){
@@ -48,7 +47,6 @@ function grabFortunes(req, res){
   return client.query(sqlStatement, values)
     // send back data
     .then(result => {
-      console.log(result);
       let fortuneArr = [];
       if(result.rowCount > 0) {
         fortuneArr = result.rows.map(fortune => {
@@ -93,7 +91,6 @@ function facePlusAPICall (req, res) {
             emotionsObj.happiness,
             created_on
           ];
-          console.log(insertValues);
           client.query(insertStatement, insertValues);
           return res.send(faceAPIInstance);
         });
