@@ -50,9 +50,8 @@ function grabFortunes(req, res){
       let fortuneArr = [];
       if(result.rowCount > 0) {
         fortuneArr = result.rows.map(fortune => {
-          return new Fortune(fortune.username, fortune.fortune, fortune.lotto, fortune.dominant_attribute, fortune.score, fortune.created_on);
+          return new Fortune(fortune.username, fortune.fortune, fortune.lotto, fortune.dominant_attribute, fortune.sadness, fortune.neutral, fortune.disgust, fortune.anger, fortune.surprise, fortune.fear, fortune.happiness, fortune.created_on);
         });
-        console.log(fortuneArr);
         return res.send(fortuneArr);
       } else {
         return res.send('You do not have any fortunes');
