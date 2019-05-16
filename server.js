@@ -52,6 +52,7 @@ function grabFortunes(req, res){
         fortuneArr = result.rows.map(fortune => {
           return new Fortune(fortune.username, fortune.fortune, fortune.lotto, fortune.dominant_attribute, fortune.score, fortune.created_on);
         });
+        console.log(fortuneArr);
         return res.send(fortuneArr);
       } else {
         return res.send('You do not have any fortunes');
