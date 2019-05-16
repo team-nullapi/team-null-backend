@@ -44,14 +44,15 @@ app.get('/fortunes', (request, response) => grabFortunes(request, response));
 function grabFortunes(req, res){
   // query sql table for data based on username
   let sqlStatement = 'SELECT * FROM users WHERE username=$1';
-  let values = [req.query.data.username];
+  let values = ['adminTest'];
   return client.query(sqlStatement, values)
-    // send back data 
+    // send back data
     .then(result => {
+      console.log(result);
       let fortuneArr = [];
       if(result.rowCount > 0) {
         fortuneArr = result.rows.map(fortune => {
-          return new Fortune(fortune.username, fortune.fortune, fortune.lotto, fortune.dominant_attribute, fortune.score, fortune.created_on)
+          return new Fortune(fortune.username, fortune.fortune, fortune.lotto, fortune.dominant_attribute, fortune.score, fortune.created_on);
         });
         return res.send(fortuneArr);
       } else {
@@ -73,27 +74,29 @@ function facePlusAPICall (req, res) {
         let emotionsObj = faceAPIRes.body.faces[0].attributes.emotion;
         let lotto = lottoGen();
         let dominant_attribute = dominantAttribute(emotionsObj);
-        let fortune = fortunePicker(dominant_attribute);
-        let username = req.body.username;
-        let created_on = Date.now();
-        let faceAPIInstance = new Fortune (username, fortune, lotto, dominant_attribute, emotionsObj.sadness, emotionsObj.neutral, emotionsObj.disgust, emotionsObj.anger, emotionsObj.surprise, emotionsObj.fear, emotionsObj.happiness, created_on);
-        let insertStatement = `INSERT INTO users (username, fortune, lotto, dominant_attribute, sadness, neutral, disgust, anger, surprise, fear, happiness, created_on) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) ON CONFLICT DO NOTHING;`;
-        let insertValues = [
-          username,
-          fortune,
-          lotto,
-          dominant_attribute,
-          emotionsObj.sadness,
-          emotionsObj.neutral,
-          emotionsObj.disgust,
-          emotionsObj.anger,
-          emotionsObj.surprise,
-          emotionsObj.fear,
-          emotionsObj.happiness,
-          created_on
-        ];
-        client.query(insertStatement, insertValues);
-        return res.send(faceAPIInstance);
+        fortunePicker(dominant_attribute).then(fortune => {
+          let username = req.body.username;
+          let created_on = Date.now();
+          let faceAPIInstance = new Fortune (username, fortune, lotto, dominant_attribute, emotionsObj.sadness, emotionsObj.neutral, emotionsObj.disgust, emotionsObj.anger, emotionsObj.surprise, emotionsObj.fear, emotionsObj.happiness, created_on);
+          let insertStatement = `INSERT INTO users (username, fortune, lotto, dominant_attribute, sadness, neutral, disgust, anger, surprise, fear, happiness, created_on) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) ON CONFLICT DO NOTHING;`;
+          let insertValues = [
+            username,
+            fortune,
+            lotto,
+            dominant_attribute,
+            emotionsObj.sadness,
+            emotionsObj.neutral,
+            emotionsObj.disgust,
+            emotionsObj.anger,
+            emotionsObj.surprise,
+            emotionsObj.fear,
+            emotionsObj.happiness,
+            created_on
+          ];
+          console.log(insertValues);
+          client.query(insertStatement, insertValues);
+          return res.send(faceAPIInstance);
+        });
       })
       .catch(err => console.log(err));
 
@@ -123,12 +126,17 @@ function lottoGen() {
 }
 
 function fortunePicker(dominant_attribute) {
-  //to do flesh out fortune picker to pick fortunes from a db
-  if (dominant_attribute === 'anger') {
-    return 'This is an angry fortune';
-  } else {
-    return 'This is not an angry fortune';
-  }
+  let selectSQL = `SELECT * FROM ${dominant_attribute}`;
+  return client.query(selectSQL)
+    .then(result => {
+      if(result.rowCount > 0) {
+        let randomFor = Math.floor(Math.random() * (result.rowCount - 0)) + 0;
+        let fortune = result.rows[randomFor].fortune_text;
+        return fortune;
+      } else {
+        return 'Oops Something Went Wrong';
+      }
+    });
 }
 
 app.use('*', (request, response) => response.send('Oops'));
