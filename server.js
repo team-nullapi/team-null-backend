@@ -43,7 +43,7 @@ app.get('/fortunes', (request, response) => grabFortunes(request, response));
 function grabFortunes(req, res){
   // query sql table for data based on username
   let sqlStatement = 'SELECT * FROM users WHERE username=$1';
-  let values = ['adminTest'];
+  let values = [req.query.data.username];
   return client.query(sqlStatement, values)
     // send back data
     .then(result => {
